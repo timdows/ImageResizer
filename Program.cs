@@ -1,15 +1,13 @@
 ﻿using ImageSharp;
-using ImageSharp.Formats;
-using ImageSharp.PixelFormats;
 using System;
 using System.IO;
 
 namespace ImageResizer
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
 			if (args.Length > 0 && args[0] != null)
 			{
 				var directory = args[0].ToString();
