@@ -8,29 +8,35 @@ namespace ImageResizer
 	{
 		public static void Main(string[] args)
 		{
-			if (args.Length > 0 && args[0] != null)
+			if (args.Length != 2)
 			{
-				var directory = args[0].ToString();
-				Console.WriteLine($"Using directory {directory}");
+				Console.WriteLine($"Missing directory and/or maxSize arguments");
+				return;
+			}
 
-				var files = Directory.GetFiles(directory, "*.jpg", SearchOption.AllDirectories);
-				var current = 0;
+			var directory = args[0].ToString();
+			if (!int.TryParse(args[1], out var maxSize))
+			{
+				Console.WriteLine($"Could not parse int maxSize");
+			}
 
-				foreach (var file in files)
-				{
-					Console.WriteLine($"{current++}/{files.Length} - Processing {file}");
-					ScaleImage(file);
-				}
+			Console.WriteLine($"Using directory {directory} and maxSize: {maxSize}");
+
+			var files = Directory.GetFiles(directory, "*.jpg", SearchOption.AllDirectories);
+			var current = 0;
+
+			foreach (var file in files)
+			{
+				Console.WriteLine($"{current++}/{files.Length} - Processing {file}");
+				ScaleImage(file, maxSize);
 			}
 		}
 
-		public static void ScaleImage(string imagePath)
+		public static void ScaleImage(string imagePath, int maxSize)
 		{
 			// Image.Load(string path) is a shortcut for our default type. Other pixel formats use Image.Load<TPixel>(string path))
 			using (Image<Rgba32> image = Image.Load(imagePath))
 			{
-				var maxSize = 800;
-
 				var ratioX = (double)maxSize / image.Width;
 				var ratioY = (double)maxSize / image.Height;
 				var ratio = Math.Min(ratioX, ratioY);
