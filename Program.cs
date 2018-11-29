@@ -34,8 +34,6 @@ namespace ImageResizer
             List<Task> backgroundTasks = new List<Task>();
             foreach (var file in files)
             {
-                // Console.WriteLine($"{current++}/{files.Length} - Processing {file}");
-                // ScaleImage(file, maxSize);
                 var task = Task.Run(() => ScaleImage(file, saveDirectory, maxSize));
                 backgroundTasks.Add(task);
             }
