@@ -56,7 +56,9 @@ namespace ImageResizer
                 var newWidth = (int)(image.Width * ratio);
                 var newHeight = (int)(image.Height * ratio);
 
-                image.Mutate(x => x.Resize(newWidth, newHeight));
+                image.Mutate(x => x
+                    .Resize(newWidth, newHeight)
+                    .AutoOrient());
                 image.Save(savePath);
             }
 
