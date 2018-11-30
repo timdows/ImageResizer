@@ -31,6 +31,7 @@ namespace ImageResizer
 
             var files = Directory.GetFiles(inputDirectory, "*.jpg", SearchOption.AllDirectories);
 
+            var stopwatch = Stopwatch.StartNew();
             List<Task> backgroundTasks = new List<Task>();
             foreach (var file in files)
             {
@@ -41,6 +42,9 @@ namespace ImageResizer
             Console.WriteLine($"Added {backgroundTasks.Count} images to be scaled to background task");
 
             await Task.WhenAll(backgroundTasks);
+
+            stopwatch.Stop();
+            Console.WriteLine($"{backgroundTasks.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
         }
 
         public static async Task ScaleImage(string imagePath, string saveDirectory, int maxSize)
