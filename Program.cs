@@ -38,13 +38,19 @@ namespace ImageResizer
                 backgroundTasks.Add(task);
             }
 
+            Console.WriteLine($"Added {backgroundTasks.Count} images to be scaled to background task");
+
             await Task.WhenAll(backgroundTasks);
         }
 
         public static async Task ScaleImage(string imagePath, string saveDirectory, int maxSize)
         {
             var fileName = Path.GetFileName(imagePath);
-            var savePath = Path.Combine(saveDirectory, fileName);
+            var imageDirectoryName = Path.GetFileName(Path.GetDirectoryName(imagePath));
+            var saveDirectoryWithSubdir = Path.Combine(saveDirectory, imageDirectoryName);
+            Directory.CreateDirectory(saveDirectoryWithSubdir);
+
+            var savePath = Path.Combine(saveDirectoryWithSubdir, fileName);
             var stopwatch = Stopwatch.StartNew();
 
             using (Image<Rgba32> image = Image.Load(imagePath))
