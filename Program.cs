@@ -55,7 +55,7 @@ namespace ImageResizer
             Directory.CreateDirectory(saveDirectoryWithSubdir);
 
             var savePath = Path.Combine(saveDirectoryWithSubdir, fileName);
-            var stopwatch = Stopwatch.StartNew();
+            //var stopwatch = Stopwatch.StartNew();
 
             using (Image<Rgba32> image = Image.Load(imagePath))
             {
@@ -72,8 +72,8 @@ namespace ImageResizer
                 image.Save(savePath);
             }
 
-            stopwatch.Stop();
-            Console.WriteLine($"Done after {stopwatch.ElapsedMilliseconds} with {imagePath}");
+            //stopwatch.Stop();
+            //Console.WriteLine($"Done after {stopwatch.ElapsedMilliseconds} with {imagePath}");
         }
     }
 }
