@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ImageResizer
 {
@@ -29,7 +29,8 @@ namespace ImageResizer
 
             Console.WriteLine($"1. Input directory: {inputDirectory}\r\n2. Save directory: {saveDirectory}\r\n3. MaxSize: {maxSize}");
 
-            var files = Directory.GetFiles(inputDirectory, "*.jpg", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(inputDirectory, "*.jpg", SearchOption.AllDirectories).ToList();
+            files.AddRange(Directory.GetFiles(inputDirectory, "*.png", SearchOption.AllDirectories));
 
             var stopwatch = Stopwatch.StartNew();
             List<Task> backgroundTasks = new List<Task>();
