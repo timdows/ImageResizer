@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace ImageResizer
 {
-    public class Program
+    public static class Program
     {
         public static async Task Main(string[] args)
         {
@@ -48,7 +48,7 @@ namespace ImageResizer
             Console.WriteLine($"{backgroundTasks.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
         }
 
-        public static async Task ScaleImage(string imagePath, string saveDirectory, int maxSize)
+        public static void ScaleImage(string imagePath, string saveDirectory, int maxSize)
         {
             var fileName = Path.GetFileName(imagePath);
             var imageDirectoryName = Path.GetFileName(Path.GetDirectoryName(imagePath));
