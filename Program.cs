@@ -1,18 +1,17 @@
 ﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ImageResizer
 {
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length != 3)
             {
@@ -31,24 +30,27 @@ namespace ImageResizer
 
             var files = Directory.GetFiles(inputDirectory, "*.jpg", SearchOption.AllDirectories).ToList();
             files.AddRange(Directory.GetFiles(inputDirectory, "*.png", SearchOption.AllDirectories));
+            files = files.OrderBy(item => item).ToList();
+
+            Console.WriteLine($"Found {files.Count} images to be scaled");
 
             var stopwatch = Stopwatch.StartNew();
-            List<Task> backgroundTasks = new List<Task>();
-            foreach (var file in files)
+            var totalToProcess = files.Count;
+            var processedCount = 0;
+
+            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 8 }, (file, state, index) =>
             {
-                var task = Task.Run(() => ScaleImage(file, saveDirectory, maxSize));
-                backgroundTasks.Add(task);
-            }
+                var message = ScaleImage(file, saveDirectory, maxSize);
+                Interlocked.Increment(ref processedCount);
+                Console.WriteLine($"{processedCount}/{totalToProcess}, {index} {message}");
+            });
 
-            Console.WriteLine($"Added {backgroundTasks.Count} images to be scaled to background task");
-
-            await Task.WhenAll(backgroundTasks);
 
             stopwatch.Stop();
-            Console.WriteLine($"{backgroundTasks.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
+            Console.WriteLine($"{files.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
         }
 
-        public static void ScaleImage(string imagePath, string saveDirectory, int maxSize)
+        public static string ScaleImage(string imagePath, string saveDirectory, int maxSize)
         {
             var fileName = Path.GetFileName(imagePath);
             var imageDirectoryName = Path.GetFileName(Path.GetDirectoryName(imagePath));
@@ -58,7 +60,7 @@ namespace ImageResizer
             var savePath = Path.Combine(saveDirectoryWithSubdir, fileName);
             var stopwatch = Stopwatch.StartNew();
 
-            using (Image<Rgba32> image = Image.Load(imagePath))
+            using (var image = Image.Load(imagePath))
             {
                 var ratioX = (double)maxSize / image.Width;
                 var ratioY = (double)maxSize / image.Height;
@@ -67,14 +69,30 @@ namespace ImageResizer
                 var newWidth = (int)(image.Width * ratio);
                 var newHeight = (int)(image.Height * ratio);
 
+                if (newHeight > image.Height)
+                {
+                    newHeight = image.Height;
+                }
+                if (newWidth > image.Width)
+                {
+                    newWidth = image.Width;
+                }
+
                 image.Mutate(x => x
                     .Resize(newWidth, newHeight)
                     .AutoOrient());
                 image.Save(savePath);
             }
 
+            var fileInfo = new FileInfo(imagePath);
+            var creationTime = fileInfo.CreationTime;
+            var lastWriteTime = fileInfo.LastWriteTime;
+
+            File.SetCreationTime(savePath, creationTime);
+            File.SetLastWriteTime(savePath, lastWriteTime);
+
             stopwatch.Stop();
-            Console.WriteLine($"Done after {stopwatch.ElapsedMilliseconds} with {imagePath}");
+            return $"On thread {Thread.CurrentThread.ManagedThreadId} after {stopwatch.ElapsedMilliseconds} done with {imagePath}";
         }
     }
 }
