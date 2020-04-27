@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,8 @@ namespace ImageResizer
             files.AddRange(Directory.GetFiles(inputDirectory, "*.png", SearchOption.AllDirectories));
             files = files.OrderBy(item => item).ToList();
 
+            //FixDates(files);
+
             Console.WriteLine($"Found {files.Count} images to be scaled");
 
             var stopwatch = Stopwatch.StartNew();
@@ -50,7 +53,25 @@ namespace ImageResizer
             Console.WriteLine($"{files.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
         }
 
-        public static string ScaleImage(string imagePath, string saveDirectory, int maxSize)
+        private static void FixDates(List<string> files)
+        {
+            foreach (var file in files)
+            {
+                var fileInfo = new FileInfo(file);
+                var creationTime = fileInfo.CreationTime;
+                var lastWriteTime = fileInfo.LastWriteTime;
+
+                if (creationTime > DateTime.Today || lastWriteTime > DateTime.Today)
+                {
+                    var fix = DateTime.Today;
+                    File.SetCreationTime(file, fix);
+                    File.SetLastWriteTime(file, fix);
+                }
+            }
+        }
+
+
+        private static string ScaleImage(string imagePath, string saveDirectory, int maxSize)
         {
             var fileName = Path.GetFileName(imagePath);
             var imageDirectoryName = Path.GetFileName(Path.GetDirectoryName(imagePath));
