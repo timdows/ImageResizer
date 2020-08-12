@@ -48,7 +48,6 @@ namespace ImageResizer
                 Console.WriteLine($"{processedCount}/{totalToProcess}, {index} {message}");
             });
 
-
             stopwatch.Stop();
             Console.WriteLine($"{files.Count} images scaled after {stopwatch.ElapsedMilliseconds}");
         }
@@ -70,7 +69,6 @@ namespace ImageResizer
             }
         }
 
-
         private static string ScaleImage(string imagePath, string saveDirectory, int maxSize)
         {
             var fileName = Path.GetFileName(imagePath);
@@ -79,6 +77,12 @@ namespace ImageResizer
             Directory.CreateDirectory(saveDirectoryWithSubdir);
 
             var savePath = Path.Combine(saveDirectoryWithSubdir, fileName);
+
+            if (File.Exists(savePath))
+            {
+                return $"File exists {savePath}";
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             using (var image = Image.Load(imagePath))
